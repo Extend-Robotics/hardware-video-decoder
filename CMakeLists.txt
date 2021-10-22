@@ -4,11 +4,31 @@ project(
     hvd
 )
 
+# system vs custom LGPL FFmpeg build
+
+if(DEFINED FFMPEG_MODULE_PATH) # point to custom FindFFMPEG.cmake with LGPL build
+  list(APPEND CMAKE_MODULE_PATH ${FFMPEG_MODULE_PATH}) #"/home/meglickib/test/vcpkg/installed/x64-linux-er/share/ffmpeg")
+  set(CMAKE_INSTALL_RPATH $ORIGIN/lib)
+  find_package(FFMPEG REQUIRED)
+  LIST(GET FFMPEG_LIBRARY_DIRS 0 FFMPEG_LIBRARY_RELEASE_DIR)
+else()
+  MESSAGE(WARNING "trying to use system FFMmpeg libraries, define FFMPEG_MODULE_PATH for custom distributable FFmpeg LGPL build")
+  set(FFMPEG_LIBRARIES avcodec avutil)
+endif()
+
+# build
+
 add_library(hvd hvd.c)
-target_link_libraries(hvd avcodec avutil)
-install(TARGETS hvd DESTINATION lib)
-install(FILES hvd.h DESTINATION include)
+target_link_libraries(hvd ${FFMPEG_LIBRARIES})
 
 add_executable(hvd-decoding-example examples/hvd_decoding_example.c)
 target_link_libraries(hvd-decoding-example hvd)
 
+# install
+
+install(TARGETS hvd DESTINATION lib)
+install(FILES hvd.h DESTINATION include)
+
+if(DEFINED FFMPEG_MODULE_PATH)
+  install(DIRECTORY ${FFMPEG_LIBRARY_DIRS} DESTINATION lib FILES_MATCHING PATTERN "*.so*")
+endif()

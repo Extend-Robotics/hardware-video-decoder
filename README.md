@@ -67,6 +67,8 @@ cd hardware-video-decoder
 mkdir build
 cd build
 cmake ..
+# alternatively specify FFMPEG_MODULE_PATH pointing to LGPL FFMPEG
+# cmake .. -DFFMPEG_MODULE_PATH=[directory_with_FindFFMPEG.cmake]
 make
 ```
 
